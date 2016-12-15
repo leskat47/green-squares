@@ -23,8 +23,28 @@ def get_dates(user_data):
 
     for item in user_data:
         if item["payload"].get("commits"):
-            dates.append(item["created_at"])
-
+            for commit in item["payload"]["commits"]:
+                commit_data = requests.get(url).json()
+                date = datetime.strptime(commit_data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
+                dates.append(date)
+    # "commit": {
+        # "author": {
+        #   "name": "Leslie Castellanos",
+        #   "email": "lesliekate@gmail.com",
+        #   "date": "2016-12-14T07:31:18Z"
+        # },
+        # "committer": {
+        #   "name": "Leslie Castellanos",
+        #   "email": "lesliekate@gmail.com",
+        #   "date": "2016-12-14T07:31:18Z"
+        # },
+        # "message": "Pseudocode written",
+        # "tree": {
+        #   "sha": "8173488cd9182dc303082236bbb8c26b96d993af",
+        #   "url": "https://api.github.com/repos/leskat47/green-squares/git/trees/8173488cd9182dc303082236bbb8c26b96d993af"
+        # },
+        # "url": "https://api.github.com/repos/leskat47/green-squares/git/commits/5c285a3594ad9fed2ebed4113442a478bc8479b4",
+        # "comment_count": 0
     return dates
 
 
@@ -35,12 +55,11 @@ def get_date(user_data, idx):
     return date_local
 
 def get_longest_streak(user_data):
-
+    # FIXME: Change to new CORRECT commit dates
+    
     # check for commit today or yesterday
     today = date.today()
-    print "today ", today
     event_date = get_date(user_data, 0)
-    print event_date
 
     prev_event_date = get_date(user_data, 1)
     # is the last event today or yesterday?
@@ -56,13 +75,15 @@ def get_longest_streak(user_data):
             day_counter = 1
         else:
             return 0
+    else:
+        day_counter = 1
 
     # iterate in reverse order
     for i in range(len(user_data) - 1):
         if not user_data[i]["payload"].get("commits"):
             return day_counter
         # Compare to date minus one day using datetime
-        if get_date(user_data, i) == get_date(user_data, i - 1 ) - 1:
+        if get_date(user_data, i) == get_date(user_data, i - 1 ) - timedelta(days=1):
             day_counter += 1
 
     return day_counter
