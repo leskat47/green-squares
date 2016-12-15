@@ -1,5 +1,5 @@
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "jgriffith23", "levi006", "allymcknight"]
 
@@ -33,8 +33,10 @@ def get_date(user_data, idx):
 def get_longest_streak(user_data):
 
     # check for commit today or yesterday
-    today = datetime.today().date()
+    today = date.today()
     event_date = get_date(user_data, -1)
+    print event_date
+
     prev_event_date = get_date(user_data, -2)
     # is the last event today or yesterday?
     if event_date != today and event_date != today - timedelta(days=1):
@@ -63,7 +65,7 @@ def get_longest_streak(user_data):
 user_streaks = {}
 for user in participants:
     data = get_user_data(user)
-    print get_longest_streak(data)
+    get_longest_streak(data)
 
     # get length of streak
     # Add user to dictionary,
