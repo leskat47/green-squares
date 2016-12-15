@@ -27,7 +27,7 @@ def get_dates(user_data):
 
 
 def get_date(user_data, idx):
-    return datetime.strptime(user_data[idx]["created_at"], "%Y-%m-%dT%H:%M:%SZ").date
+    return datetime.strptime(user_data[idx]["created_at"], "%Y-%m-%dT%H:%M:%SZ").date()
 
 
 def get_longest_streak(user_data):
