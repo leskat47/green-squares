@@ -8,6 +8,9 @@ to_zone = tz.gettz('America/Los_Angeles')
 
 r = requests.get("https://api.github.com/users/leskat47/events").json()
 
+# FIXME: Rate limit hit, register app and authenticate:
+# https://developer.github.com/guides/basics-of-authentication/
+
 
 def get_user_data(participant):
     """ Get data from github api """
@@ -24,32 +27,15 @@ def get_dates(user_data):
     for item in user_data:
         if item["payload"].get("commits"):
             for commit in item["payload"]["commits"]:
-                commit_data = requests.get(url).json()
+                commit_data = requests.get(commit["url"]).json()
+                print commit_data
                 date = datetime.strptime(commit_data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
                 dates.append(date)
-    # "commit": {
-        # "author": {
-        #   "name": "Leslie Castellanos",
-        #   "email": "lesliekate@gmail.com",
-        #   "date": "2016-12-14T07:31:18Z"
-        # },
-        # "committer": {
-        #   "name": "Leslie Castellanos",
-        #   "email": "lesliekate@gmail.com",
-        #   "date": "2016-12-14T07:31:18Z"
-        # },
-        # "message": "Pseudocode written",
-        # "tree": {
-        #   "sha": "8173488cd9182dc303082236bbb8c26b96d993af",
-        #   "url": "https://api.github.com/repos/leskat47/green-squares/git/trees/8173488cd9182dc303082236bbb8c26b96d993af"
-        # },
-        # "url": "https://api.github.com/repos/leskat47/green-squares/git/commits/5c285a3594ad9fed2ebed4113442a478bc8479b4",
-        # "comment_count": 0
+
     return dates
 
 
-def get_date(user_data, idx):
-    date_utc = datetime.strptime(user_data[idx]["created_at"], "%Y-%m-%dT%H:%M:%SZ")
+def convert_date(date_utc):
     date_utc = date_utc.replace(tzinfo=from_zone)
     date_local = date_utc.astimezone(to_zone).date()
     return date_local
