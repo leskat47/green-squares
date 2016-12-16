@@ -44,37 +44,24 @@ def convert_date(date_utc):
     date_local = date_utc.astimezone(to_zone).date()
     return date_local
 
-def get_longest_streak(user_data):
-    # FIXME: Change to new CORRECT commit dates
+def get_longest_streak(dates):
 
     # check for commit today or yesterday
     today = date.today()
-    event_date = get_date(user_data, 0)
+    event_date = dates[0]
 
-    prev_event_date = get_date(user_data, 1)
-    # is the last event today or yesterday?
+    # is the most recent event today or yesterday?
     if event_date != today and event_date != today - timedelta(days=1):
         return 0
 
-    # if the last event is yesterday, and it has commits
-    if event_date == today - timedelta(days=1) and user_data[0]["payload"].get("commits"):
-        day_counter = 1
-    # if the last event is today but there are no commits, check that yesterday has commits
-    elif event_date == today and not user_data[-1]["payload"].get("commits"):
-        if prev_event_date == today - timedelta(days=1) and user_data[1]["payload"].get("commits"):
-            day_counter = 1
-        else:
-            return 0
-    else:
-        day_counter = 1
+    day_counter = 0
 
-    # iterate in reverse order
-    for i in range(len(user_data) - 1):
-        if not user_data[i]["payload"].get("commits"):
-            return day_counter
+    for i in range(len(dates) - 1):
         # Compare to date minus one day using datetime
-        if get_date(user_data, i) == get_date(user_data, i - 1 ) - timedelta(days=1):
+        if dates[i] == dates[i - 1] - timedelta(days=1):
             day_counter += 1
+        else:
+            return day_counter
 
     return day_counter
 
