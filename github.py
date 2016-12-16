@@ -1,12 +1,16 @@
 import requests
 from datetime import datetime, timedelta, date
 from dateutil import tz
+import os
 
 participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "jgriffith23", "levi006", "allymcknight"]
 from_zone = tz.gettz('UTC')
 to_zone = tz.gettz('America/Los_Angeles')
 
-r = requests.get("https://api.github.com/users/leskat47/events").json()
+token = os.environ["PERSONALACCESSTOKEN"]
+headers = {'Authorization': 'token %s' % token}
+
+r = requests.get("https://api.github.com/users/leskat47/events", headers=headers).json()
 
 # FIXME: Rate limit hit, register app and authenticate:
 # https://developer.github.com/guides/basics-of-authentication/
@@ -27,9 +31,9 @@ def get_dates(user_data):
     for item in user_data:
         if item["payload"].get("commits"):
             for commit in item["payload"]["commits"]:
-                commit_data = requests.get(commit["url"]).json()
-                print commit_data
+                commit_data = requests.get(commit["url"], headers=headers).json()
                 date = datetime.strptime(commit_data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
+                date = convert_date(date)
                 dates.append(date)
 
     return dates
@@ -42,7 +46,7 @@ def convert_date(date_utc):
 
 def get_longest_streak(user_data):
     # FIXME: Change to new CORRECT commit dates
-    
+
     # check for commit today or yesterday
     today = date.today()
     event_date = get_date(user_data, 0)
@@ -74,11 +78,11 @@ def get_longest_streak(user_data):
 
     return day_counter
 
-user_streaks = {}
-for user in participants:
-    print user
-    data = get_user_data(user)
-    print get_longest_streak(data)
+# user_streaks = {}
+# for user in participants:
+#     print user
+#     data = get_user_data(user)
+#     print get_longest_streak(data)
 
     # get length of streak
     # Add user to dictionary,
