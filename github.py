@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, date
 from dateutil import tz
 import os
 
-participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "jgriffith23", "levi006", "allymcknight"]
+participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "", "levi006", "allymcknight"]
 from_zone = tz.gettz('UTC')
 to_zone = tz.gettz('America/Los_Angeles')
 
@@ -12,15 +12,15 @@ headers = {'Authorization': 'token %s' % token}
 
 r = requests.get("https://api.github.com/users/leskat47/events", headers=headers).json()
 
-# FIXME: Rate limit hit, register app and authenticate:
+# Rate limit, register app and authenticate:
 # https://developer.github.com/guides/basics-of-authentication/
 
 
 def get_user_data(participant):
     """ Get data from github api """
 
-    url = "https://api.github.com/users/" + user + "/events"
-    return requests.get(url).json()
+    url = "https://api.github.com/users/" + participant + "/events"
+    return requests.get(url, headers=headers).json()
 
 
 def get_dates(user_data):
@@ -35,6 +35,7 @@ def get_dates(user_data):
                 date = datetime.strptime(commit_data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
                 date = convert_date(date)
                 dates.append(date)
+    dates = sorted(set(dates), reverse=True)
 
     return dates
 
@@ -55,21 +56,24 @@ def get_longest_streak(dates):
         return 0
 
     day_counter = 0
+    if dates:
+        day_counter = 1
 
     for i in range(len(dates) - 1):
         # Compare to date minus one day using datetime
-        if dates[i] == dates[i - 1] - timedelta(days=1):
+        if dates[i] == dates[i + 1] + timedelta(days=1):
             day_counter += 1
         else:
             return day_counter
 
     return day_counter
 
-# user_streaks = {}
-# for user in participants:
-#     print user
-#     data = get_user_data(user)
-#     print get_longest_streak(data)
+user_streaks = {}
+for user in participants:
+    print user
+    data = get_user_data(user)
+    dates = get_dates(data)
+    print user, " ", get_longest_streak(dates)
 
     # get length of streak
     # Add user to dictionary,
