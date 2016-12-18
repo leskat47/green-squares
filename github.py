@@ -3,7 +3,8 @@ from datetime import datetime, timedelta, date
 from dateutil import tz
 import os
 
-participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "", "levi006", "allymcknight"]
+# participants = ["leskat47", "lobsterkatie", "jacquelineawatts", "franziskagoltz", "levi006", "allymcknight"]
+participants = ["leskat47"]
 from_zone = tz.gettz('UTC')
 to_zone = tz.gettz('America/Los_Angeles')
 
@@ -35,7 +36,7 @@ def get_dates(user_data):
                 date = datetime.strptime(commit_data["commit"]["committer"]["date"], "%Y-%m-%dT%H:%M:%SZ")
                 date = convert_date(date)
                 dates.append(date)
-    dates = sorted(set(dates), reverse=True)
+    dates = sorted(set(dates))
 
     return dates
 
@@ -49,7 +50,7 @@ def get_longest_streak(dates):
 
     # check for commit today or yesterday
     today = date.today()
-    event_date = dates[0]
+    event_date = dates[-1]
 
     # is the most recent event today or yesterday?
     if event_date != today and event_date != today - timedelta(days=1):
@@ -59,21 +60,18 @@ def get_longest_streak(dates):
     if dates:
         day_counter = 1
 
-    for i in range(len(dates) - 1):
+    for i in range((len(dates)-1), 1, -1):
         # Compare to date minus one day using datetime
-        if dates[i] == dates[i + 1] + timedelta(days=1):
+        if dates[i] == dates[i - 1] + timedelta(days=1):
             day_counter += 1
         else:
             return day_counter
 
     return day_counter
 
-user_streaks = {}
-for user in participants:
-    print user
-    data = get_user_data(user)
-    dates = get_dates(data)
-    print user, " ", get_longest_streak(dates)
-
-    # get length of streak
-    # Add user to dictionary,
+if __name__ == "__main__":
+    user_streaks = {}
+    for user in participants:
+        data = get_user_data(user)
+        dates = get_dates(data)
+        print user, " ", get_longest_streak(dates)
